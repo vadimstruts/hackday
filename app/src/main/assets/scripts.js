@@ -1,15 +1,16 @@
 //TODO check JS code from effectiveness point of view
-function setExchRates(dateTime, currencyName, sellRate, buyRate){
-    setDateTimeElemntValue('data-value', dateTime);
-
-    let divTableBody = document.getElementsByClassName(currencyName+'Row');
-    if(divTableBody.length === 0){
-        if(addNewRow(currencyName)){
-            setRowValues(currencyName, sellRate, buyRate);
+function setExchRates(currencyName, sellRate, updDate){
+    setTimeout(() => {
+        showProgress(false);
+        let divTableBody = document.getElementsByClassName(currencyName+'Row');
+        if(divTableBody.length === 0){
+            if(addNewRow(currencyName)){
+                setRowValues(currencyName, sellRate, updDate);
+            }
+        } else {
+            setRowValues(currencyName, sellRate, updDate);
         }
-    } else {
-        setRowValues(currencyName, sellRate, buyRate);
-    }
+    }, 1000);
 }
 
 function addNewRow(currencyName){
@@ -29,7 +30,7 @@ function addNewRow(currencyName){
 
     let divTableCellBuyVal = document.createElement("div");
     divTableCellBuyVal.classList.add('divTableCell');
-    divTableCellBuyVal.classList.add(currencyName+'-buy-val');
+    divTableCellBuyVal.classList.add(currencyName+'-upd-val');
     divTableRow.appendChild(divTableCellBuyVal);
 
     let divTableBody = document.getElementsByClassName('divTableBody');
@@ -43,39 +44,38 @@ function addNewRow(currencyName){
     }
 }
 
-function setRowValues(currencyName, sellRate, buyRate){
+function setRowValues(currencyName, sellRate, updDate){
     let foundCurrItems = document.getElementsByClassName(currencyName + 'Row');
     if(foundCurrItems.length > 0){
-    Array.from(foundCurrItems).forEach((foundCurrField, i) => {
-        if(foundCurrField)
-            foundCurrField.textContent = currencyName.toUpperCase();
-     });
+        Array.from(foundCurrItems).forEach((foundCurrField, i) => {
+            if(foundCurrField)
+                foundCurrField.textContent = currencyName.toUpperCase();
+         });
     }
 
     let foundSellItems = document.getElementsByClassName(currencyName + '-sell-val');
     if(foundSellItems.length > 0){
-    Array.from(foundSellItems).forEach((foundSellField, i) => {
-        if(foundSellField)
-            foundSellField.textContent = sellRate;
-     });
+        Array.from(foundSellItems).forEach((foundSellField, i) => {
+            if(foundSellField)
+                foundSellField.textContent = sellRate;
+         });
     }
 
-    let foundBuyItems = document.getElementsByClassName(currencyName + '-buy-val');
+    let foundBuyItems = document.getElementsByClassName(currencyName + '-upd-val');
     if(foundBuyItems.length > 0){
     Array.from(foundBuyItems).forEach((foundBuyField, i) => {
         if(foundBuyField)
-            foundBuyField.textContent = buyRate;
+            foundBuyField.textContent = updDate;
      });
     }
 }
 
-function setDateTimeElemntValue(elClass, val){
-
-  let foundItems = document.getElementsByClassName(elClass);
+function showProgress(visible){
+  let foundItems = document.getElementsByClassName('progress');
   if(foundItems.length > 0){
     Array.from(foundItems).forEach((foundField, i) => {
         if(foundField)
-            foundField.textContent = val;
+            foundField.style.display = visible ? 'block' : 'none';
      });
   }
 }

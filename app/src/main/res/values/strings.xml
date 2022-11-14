@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">hackday</string>
+    <string name="exch_rate_retrieving_error">Could not get exchange rates. Error: %s</string>
+    <string name="webview_page_loading_error">Could not send callback to activity. Error: %s</string>
+    <string name="exc_rates_resp_with_error">Something went wrong. Error code: %d Msg: %s</string>
+    <string name="exc_rates_resp_parse_with_error">Could not parse API response. Error: %s</string>
+    <string name="exc_on_complete_finished_with_error">Could not finish GetExchangeRates.onComplete Error: %s</string>
+
 </resources>
