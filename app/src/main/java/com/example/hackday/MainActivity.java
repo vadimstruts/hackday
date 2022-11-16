@@ -10,6 +10,7 @@ import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.hackday.common.ExchRatesWebViewClient;
@@ -116,13 +117,14 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("MainActivity", "onResume");
 
-        if(isStoppedState) {
-            permissionFileModule.checkAndGrantPermission((result) -> {
+        permissionFileModule.checkAndGrantPermission((result) -> {
+            Log.d("PermissionFileModule", "onResume " + isStoppedState);
+            if(isStoppedState) {
                 isStoppedState = false;
-                apiRequestMgr.Resume();
                 initializeWebView();
-            });
-        }
+                apiRequestMgr.Resume();
+            }
+        });
     }
 
     @Override
@@ -136,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetJavaScriptEnabled")
     private void initializeWebView(){
+        Log.d("PermissionFileModule", "initializeWebView");
         webViewExcRts = findViewById(R.id.webViewExchRts);
         webViewExcRts.loadUrl(AssetHtmlPagePath);
 
@@ -146,5 +149,14 @@ public class MainActivity extends AppCompatActivity {
                         getApplicationContext(),
                         this::OnWebViewInitialLoaded)
         );
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        isStoppedState = true;
+
+        permissionFileModule.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }

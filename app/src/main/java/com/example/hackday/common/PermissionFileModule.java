@@ -12,6 +12,7 @@ import android.util.Log;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -52,6 +53,26 @@ public class PermissionFileModule {
             }
         } catch (Exception e) {
             Log.e("PermissionFileModule", String.format(appCompatActivity.getApplicationContext().getString(R.string.permission_check_with_error), e));
+        }
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        if (requestCode == PermissionFileModule.PermissionRequestCode) {
+            for (int i = 0; i < permissions.length; i++) {
+                String permission = permissions[i];
+                int grantResult = grantResults[i];
+
+                if (permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                        Log.d("PermissionFileModule", "Permission granted");
+                        if(null != this.callBack)
+                            this.callBack.Call(null);
+                    } else {
+                        requestPermission();
+                    }
+                }
+            }
         }
     }
 
