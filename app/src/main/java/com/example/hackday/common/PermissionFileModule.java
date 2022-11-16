@@ -27,6 +27,7 @@ public class PermissionFileModule {
     final AppCompatActivity appCompatActivity;
     final ActivityResultLauncher<Intent> someActivityResultLauncher;
     IParametrizedCallback<Void> callBack = null;
+    boolean isPermissionRequestInProgress = false;
     public PermissionFileModule(AppCompatActivity appCompatActivity){
         this.appCompatActivity = appCompatActivity;
 
@@ -35,6 +36,7 @@ public class PermissionFileModule {
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         if (null != callBack && checkPermission()) {
+                            isPermissionRequestInProgress = false;
                             callBack.Call(null);
                         }
                     }
@@ -66,6 +68,7 @@ public class PermissionFileModule {
                 if (permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     if (grantResult == PackageManager.PERMISSION_GRANTED) {
                         Log.d("PermissionFileModule", "Permission granted");
+                        isPermissionRequestInProgress = false;
                         if(null != this.callBack)
                             this.callBack.Call(null);
                     } else {
@@ -87,6 +90,9 @@ public class PermissionFileModule {
     }
 
     private void requestPermission() {
+        if(isPermissionRequestInProgress)
+            return;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             try {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
@@ -102,6 +108,8 @@ public class PermissionFileModule {
             //below android 11
             ActivityCompat.requestPermissions(appCompatActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PermissionFileModule.PermissionRequestCode);
         }
+
+        isPermissionRequestInProgress = true;
     }
 
 }
