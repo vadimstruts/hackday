@@ -64,13 +64,16 @@ public class GetExcRatesRespParser {
                     break;
             }
 
-            callBack.onComplete(currExchRates.toString());
+            if(null != callBack)
+                callBack.onComplete(currExchRates.toString());
         }
         catch(Exception e)
         {
             final String err = String.format(context.getString(R.string.exc_rates_resp_parse_with_error), e);
             Log.e("GetExcRatesRespParser", err);
-            callBack.onError(err);
+
+            if(null != callBack)
+                callBack.onError(err);
         }
     }
 
