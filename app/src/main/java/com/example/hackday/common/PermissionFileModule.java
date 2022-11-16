@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.hackday.R;
+
 public class PermissionFileModule {
 
     final AppCompatActivity appCompatActivity;
@@ -26,7 +28,7 @@ public class PermissionFileModule {
                 requestPermission();
             }
         } catch (Exception e) {
-            Log.e("PermissionFileModule", String.format("Could not successfuly finish permission check procedure. Error: %s", e));
+            Log.e("PermissionFileModule", String.format(appCompatActivity.getApplicationContext().getString(R.string.permission_check_with_error), e));
         }
     }
 

@@ -5,5 +5,6 @@
     <string name="exc_rates_resp_with_error">Something went wrong. Error code: %d Msg: %s</string>
     <string name="exc_rates_resp_parse_with_error">Could not parse API response. Error: %s</string>
     <string name="exc_on_complete_finished_with_error">Could not finish GetExchangeRates.onComplete Error: %s</string>
+    <string name="permission_check_with_error">Could not successfully finish permission check procedure. Error: %s</string>
 
 </resources>
