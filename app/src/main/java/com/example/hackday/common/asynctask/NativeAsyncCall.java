@@ -3,7 +3,7 @@ package com.example.hackday.common.asynctask;
 import java.util.concurrent.Callable;
 
 public abstract class NativeAsyncCall<TResult> extends TaskAsyncBase<TResult> {
-    // Used to load the 'native-lib' library on application startup.
+
     static {
         System.loadLibrary("native-module");
     }

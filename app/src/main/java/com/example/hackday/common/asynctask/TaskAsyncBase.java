@@ -15,6 +15,9 @@ public abstract class TaskAsyncBase<TResult> {
     protected void ExecuteAsync(Callable<TResult> asyncWork, IPostAsyncCall<TResult> postAsyncCall){
         executor.execute(()->{
             try {
+                if(null == asyncWork)
+                    return;
+
                 final TResult res = asyncWork.call();
 
                 uiSafeHandler.post(() -> {
@@ -24,7 +27,12 @@ public abstract class TaskAsyncBase<TResult> {
                     postAsyncCall.onComplete(res);
                 });
             }catch(Exception e){
-                uiSafeHandler.post(() -> postAsyncCall.onError(e.toString()));
+                uiSafeHandler.post(() -> {
+                    if(null == postAsyncCall)
+                        return;
+
+                    postAsyncCall.onError(e.toString());
+                });
             }
         });
     }

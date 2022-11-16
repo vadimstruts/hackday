@@ -130,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         apiRequestMgr.Shutdown();
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void initializeWebView(){
         webViewExcRts = findViewById(R.id.webViewExchRts);
         webViewExcRts.loadUrl(AssetHtmlPagePath);
