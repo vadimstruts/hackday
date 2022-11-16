@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     ApiRequestMgr apiRequestMgr;
     TextView textViewExchRts;
     final ProcessExchRateNativelyAsync processExchRateNatively = new ProcessExchRateNativelyAsync();
+    PermissionFileModule permissionFileModule;
     boolean isStoppedState;
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -43,14 +44,15 @@ public class MainActivity extends AppCompatActivity {
 
         isStoppedState = false;
 
-        new PermissionFileModule(this).checkAndGrantPermission();
 
         textViewExchRts = findViewById(R.id.textViewExchRts);
         textViewExchRts.setMovementMethod(new ScrollingMovementMethod());
 
         apiRequestMgr = new ApiRequestMgr(getApplicationContext());
 
-        initializeWebView();
+        permissionFileModule = new PermissionFileModule(this);
+
+        permissionFileModule.checkAndGrantPermission((result) -> initializeWebView());
     }
 
     private void OnWebViewInitialLoaded(){
@@ -115,9 +117,11 @@ public class MainActivity extends AppCompatActivity {
         Log.d("MainActivity", "onResume");
 
         if(isStoppedState) {
-            isStoppedState = false;
-            apiRequestMgr.Resume();
-            initializeWebView();
+            permissionFileModule.checkAndGrantPermission((result) -> {
+                isStoppedState = false;
+                apiRequestMgr.Resume();
+                initializeWebView();
+            });
         }
     }
 

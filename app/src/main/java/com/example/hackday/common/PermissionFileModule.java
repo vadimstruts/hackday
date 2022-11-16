@@ -1,6 +1,7 @@
 package com.example.hackday.common;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -9,23 +10,45 @@ import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.hackday.R;
+import com.example.hackday.common.asynctask.IParametrizedCallback;
 
 public class PermissionFileModule {
 
+    public final static int PermissionRequestCode = 1231122;
+
     final AppCompatActivity appCompatActivity;
+    final ActivityResultLauncher<Intent> someActivityResultLauncher;
+    IParametrizedCallback<Void> callBack = null;
     public PermissionFileModule(AppCompatActivity appCompatActivity){
         this.appCompatActivity = appCompatActivity;
+
+        someActivityResultLauncher = appCompatActivity.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        if (null != callBack && checkPermission()) {
+                            callBack.Call(null);
+                        }
+                    }
+                });
     }
 
-    public void checkAndGrantPermission() {
+    public void checkAndGrantPermission(IParametrizedCallback<Void> callBack) {
+        this.callBack = callBack;
+
         try {
             if (!checkPermission()) {
                 requestPermission();
+            } else {
+                if(null != this.callBack)
+                    this.callBack.Call(null);
             }
         } catch (Exception e) {
             Log.e("PermissionFileModule", String.format(appCompatActivity.getApplicationContext().getString(R.string.permission_check_with_error), e));
@@ -48,15 +71,15 @@ public class PermissionFileModule {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 intent.addCategory("android.intent.category.DEFAULT");
                 intent.setData(Uri.parse(String.format("package:%s",appCompatActivity.getPackageName())));
-                appCompatActivity.startActivity(intent);
+                someActivityResultLauncher.launch(intent);
             } catch (Exception e) {
                 Intent intent = new Intent();
                 intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                appCompatActivity.startActivity(intent);
+                someActivityResultLauncher.launch(intent);
             }
         } else {
             //below android 11
-            ActivityCompat.requestPermissions(appCompatActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+            ActivityCompat.requestPermissions(appCompatActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PermissionFileModule.PermissionRequestCode);
         }
     }
 
