@@ -118,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d("MainActivity", "onResume");
 
         permissionFileModule.checkAndGrantPermission((result) -> {
-            Log.d("PermissionFileModule", "onResume " + isStoppedState);
             if(isStoppedState) {
                 isStoppedState = false;
                 initializeWebView();
@@ -138,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetJavaScriptEnabled")
     private void initializeWebView(){
-        Log.d("PermissionFileModule", "initializeWebView");
         webViewExcRts = findViewById(R.id.webViewExchRts);
         webViewExcRts.loadUrl(AssetHtmlPagePath);
 
