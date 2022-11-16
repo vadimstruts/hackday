@@ -12,6 +12,7 @@ import com.example.hackday.common.asynctask.IPostAsyncCall;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ApiRequestMgr{
 
@@ -23,12 +24,19 @@ public class ApiRequestMgr{
     final RequestQueue queue;
     final Context context;
 
+    final AtomicBoolean isStopped;
+
     public ApiRequestMgr(Context ctx){
         this.queue = Volley.newRequestQueue(ctx);
         context = ctx;
+        isStopped = new AtomicBoolean(false);
     }
 
     public void GetExchangeRates(IPostAsyncCall<String> result){
+
+        if(isStopped.get())
+            return;
+
         final GetExcRatesRespParser parser = new GetExcRatesRespParser(context);
 
         final JsonObjectRequest request = new JsonObjectRequest(
@@ -54,5 +62,13 @@ public class ApiRequestMgr{
         };
 
         queue.add(request);
+    }
+
+    public void Resume(){
+        isStopped.set(false);
+    }
+
+    public void Shutdown(){
+        isStopped.set(true);
     }
 }

@@ -26,6 +26,19 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs'] // where libs is the name of the directory!
+        }
+    }
+    ndkVersion '25.1.8937393'
 }
 
 dependencies {

@@ -4,14 +4,20 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.webkit.WebView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.hackday.common.ExchRatesWebViewClient;
+import com.example.hackday.common.PermissionFileModule;
 import com.example.hackday.common.asynctask.IPostAsyncCall;
+import com.example.hackday.common.asynctask.ProcessExchRateNativelyAsync;
+import com.example.hackday.common.asynctask.TerminatePoolAsync;
+import com.example.hackday.common.logs.SdLogger;
 import com.example.hackday.common.rest.ApiRequestMgr;
 import com.example.hackday.common.rest.GetExcRatesRespParser;
 
@@ -25,24 +31,26 @@ public class MainActivity extends AppCompatActivity {
 
     WebView webViewExcRts;
     ApiRequestMgr apiRequestMgr;
+    TextView textViewExchRts;
+    final ProcessExchRateNativelyAsync processExchRateNatively = new ProcessExchRateNativelyAsync();
+    boolean isStoppedState;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        isStoppedState = false;
+
+        new PermissionFileModule(this).checkAndGrantPermission();
+
+        textViewExchRts = findViewById(R.id.textViewExchRts);
+        textViewExchRts.setMovementMethod(new ScrollingMovementMethod());
+
         apiRequestMgr = new ApiRequestMgr(getApplicationContext());
 
-        webViewExcRts = findViewById(R.id.webViewExchRts);
-        webViewExcRts.loadUrl(AssetHtmlPagePath);
-
-        webViewExcRts.getSettings().setJavaScriptEnabled(true);
-
-        webViewExcRts.setWebViewClient(
-                new ExchRatesWebViewClient(
-                        getApplicationContext(),
-                        this::OnWebViewInitialLoaded)
-        );
+        initializeWebView();
     }
 
     private void OnWebViewInitialLoaded(){
@@ -50,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(String result) {
 
+                StringBuilder tvLogLine = new StringBuilder();
                 try {
                     JSONArray jsonResult = new JSONArray(result);
 
@@ -63,7 +72,13 @@ public class MainActivity extends AppCompatActivity {
                         webViewExcRts.evaluateJavascript(
                                 String.format("setExchRates('%s', '%s', '%s');", currName, usRate, date),
                                 null);
+
+                        tvLogLine.append(String.format("%s: %s, ", currName, usRate));
+
+                        processExchRateNatively.ExecuteAsync(currName, usRate, (logString) -> SdLogger.getInstance().AppendLine(logString), null);
                     }
+
+                    textViewExchRts.append(String.format("%s\r\n", tvLogLine));
                 }
                 catch(Exception e){
                     final String err = String.format(getString(R.string.exc_on_complete_finished_with_error), e);
@@ -85,9 +100,46 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestNextIterationIn10Sec(){
+        if(isStoppedState)
+            return;
+
         final Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(() -> webViewExcRts.evaluateJavascript("showProgress(true);",
                         s -> OnWebViewInitialLoaded()),
                 ApiRequestsInterval);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("MainActivity", "onResume");
+
+        if(isStoppedState) {
+            isStoppedState = false;
+            apiRequestMgr.Resume();
+            initializeWebView();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("MainActivity", "onStop");
+        isStoppedState = true;
+        new TerminatePoolAsync().ExecuteAsync();
+        apiRequestMgr.Shutdown();
+    }
+
+    private void initializeWebView(){
+        webViewExcRts = findViewById(R.id.webViewExchRts);
+        webViewExcRts.loadUrl(AssetHtmlPagePath);
+
+        webViewExcRts.getSettings().setJavaScriptEnabled(true);
+
+        webViewExcRts.setWebViewClient(
+                new ExchRatesWebViewClient(
+                        getApplicationContext(),
+                        this::OnWebViewInitialLoaded)
+        );
     }
 }

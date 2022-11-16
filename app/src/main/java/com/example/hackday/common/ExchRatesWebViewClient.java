@@ -2,6 +2,8 @@ package com.example.hackday.common;
 
 import android.content.Context;
 import android.util.Log;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -27,5 +29,10 @@ public class ExchRatesWebViewClient extends WebViewClient {
             Log.e("WebView", err);
             Toast.makeText(appContext, err, Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+        Log.e("ExchRatesWebViewClient", error.toString());
     }
 }
